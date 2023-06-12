@@ -714,7 +714,12 @@ func os2DB(nsName string) (string, int) {
 		case "opensuse-leap":
 			nsName = "sles:l" + r[2]
 			db = common.DBSuse
+
 		}
+	} else {
+
+		db = common.DBDebian
+
 	}
 	return nsName, db
 }
