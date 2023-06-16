@@ -1,1 +1,1 @@
-{"Registry":"https://registry.hub.docker.com/","Username":"","Password":"","Repository":"library/mysql","Tag":"latest","Proxy":"","ScanLayers":true}
+{"Registry":"http://127.0.0.1:5000","Username":"","Password":"","Repository":"/scanner","Tag":"latest","Proxy":"","ScanLayers":true}
