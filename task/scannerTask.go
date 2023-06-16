@@ -96,9 +96,9 @@ func main() {
 	log.SetFormatter(&utils.LogFormatter{Module: "SCT"})
 
 	scanType := flag.String("t", "", "scan type: reg, pkg, dat or awl (Required)")
-	infile := flag.String("i", "input.json", "input json name")    // uuid input filename
-	outfile := flag.String("o", "result.json", "output json name") // uuid output filename
-	rtSock := flag.String("u", "", "Container socket URL")         // used for scan local image
+	infile := flag.String("i", "input.json", "input json name")         // uuid input filename
+	outfile := flag.String("o", "/tmp/result.json", "output json name") // uuid output filename
+	rtSock := flag.String("u", "", "Container socket URL")              // used for scan local image
 	flag.Usage = usage
 	flag.Parse()
 
@@ -133,6 +133,9 @@ func main() {
 		nRet := -1
 		if checkDbReady() { // check if loaded and unzipped in the target path
 			if tm, ok := InitTaskMain(*outfile); ok {
+				fmt.Println("---------------scanType:", *scanType)
+				fmt.Println("---------------input:", *infile)
+				fmt.Println("---------------imageWorkingPath:", imageWorkingPath)
 				nRet = processRequest(tm, *scanType, *infile, imageWorkingPath)
 			}
 		}

@@ -84,7 +84,9 @@ func (tm *taskMain) doScanTask(request interface{}, workingPath string) int {
 	}
 
 	// log.WithFields(log.Fields{"result": res}).Info("")
+	// 反序列化结果数据
 	data, _ := json.Marshal(res)
+	// 将结果数据写入到结果文件中
 	ioutil.WriteFile(tm.outfile, data, 0644)
 	return 0
 }
