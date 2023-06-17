@@ -29,4 +29,5 @@ _testmain.go
 *.bak
 
 /scanner
-/task/scannerTask_test1.go
+/task/scannerTask_test1.g  
+.metals/
