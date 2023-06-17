@@ -49,8 +49,14 @@ var cveTools *cvetools.CveTools // available inside package
 var scanTasker *Tasker          // available inside package
 var selfID string
 
+//于读取cveDB数据库的函数
+// path: cvedb数据文件所在的路径
+// maxRetry :重试次数
+// output: cvedb文件加压目标路径
 func dbRead(path string, maxRetry int, output string) map[string]*share.ScanVulnerability {
+	// cvedb文件全路径
 	dbFile := path + share.DefaultCVEDBName
+	// cvedb文件解压密钥
 	encryptKey := common.GetCVEDBEncryptKey()
 
 	var retry int
@@ -63,14 +69,16 @@ func dbRead(path string, maxRetry int, output string) map[string]*share.ScanVuln
 			log.WithFields(log.Fields{"file": dbFile}).Error("cannot find scanner db")
 		} else {
 			cveTools.UpdateMux.Lock()
+			// 读取cvedb数据库的 版本号、创建时间
 			if verNew, createTime, err := common.LoadCveDb(path, cveTools.TbPath, encryptKey); err == nil {
 				cveTools.CveDBVersion = verNew
 				cveTools.CveDBCreateTime = createTime
+
 				if dbData, outCVEs, err = common.ReadCveDbMeta(cveTools.TbPath, output != ""); err != nil {
 					log.WithFields(log.Fields{"error": err}).Error("Failed to load scanner db")
 				} else {
 					dbReady = true
-
+					// 此时是垃圾代码
 					if output != "" {
 						out := outputCVE{
 							Version:    verNew,
@@ -79,6 +87,7 @@ func dbRead(path string, maxRetry int, output string) map[string]*share.ScanVuln
 						}
 						file, _ := json.MarshalIndent(out, "", "    ")
 						_ = ioutil.WriteFile(output, file, 0644)
+
 					}
 				}
 			}
@@ -196,9 +205,11 @@ func main() {
 
 	// acquire tool
 	sys := system.NewSystemTools()
+	// cvetools默认属性tbPath = "/tmp/neuvector/db/"
 	cveTools = cvetools.NewCveTools(*rtSock, scan.NewScanUtil(sys))
 
 	// output cvedb in json format
+	// 垃圾代码
 	if *output != "" {
 		dbRead(*dbPath, 3, *output)
 		return
@@ -209,6 +220,7 @@ func main() {
 
 	// If license parameter is given, this is an on-demand scanner, no register to the controller,
 	// but if join address is given, the scan result are sent to the controller.
+	// 如果不连接到服务端，进行扫描操作，license必须不为空
 	if *license != "" {
 		if (*repository == "" || *tag == "") && *image == "" {
 			log.Error("Missing the repository name and tag of the image to be scanned")
@@ -229,6 +241,7 @@ func main() {
 	os.MkdirAll(cvetools.ImageWorkingPath, 0755)
 
 	var err error
+	// 判断scanner是否在容器中运行,判断当前系统是否支持操作
 	if sys.IsRunningInContainer() {
 		selfID, _, err = sys.GetSelfContainerID() // it is a POD ID in the k8s cgroup v2; otherwise, a real container ID
 		if selfID == "" {
@@ -238,15 +251,17 @@ func main() {
 	} else {
 		log.Debug("Not running in container.")
 	}
-
+	// platform（平台类型 docker kubernetes Rancher Aliyun）, flavor(容器平台类型，gke rancher openshift), network（网络类型default flannel calico）, containers, err
+	//此处与容器平台类型、网络类型无关，所以忽略返回值
 	if platform, _, _, containers, err := global.SetGlobalObjects(*rtSock, nil); err == nil {
 		if platform == share.PlatformKubernetes {
 			selfID = adjustContainerPod(selfID, containers)
 		}
 	}
-
+	// 初始化扫描任务
 	scanTasker = newTasker(taskerPath, *rtSock, showTaskDebug, sys)
 	if scanTasker != nil {
+		// tasker初始化成功
 		log.Debug("Use scannerTask")
 		defer scanTasker.Close()
 	}
