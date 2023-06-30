@@ -126,7 +126,7 @@ func (rs *rpcService) ScanAwsLambda(ctx context.Context, req *share.ScanAwsLambd
 func startGRPCServer() *cluster.GRPCServer {
 	var grpc *cluster.GRPCServer
 	var err error
-
+	// 默认端口18402
 	port := cluster.DefaultScannerGRPCPort
 
 	log.WithFields(log.Fields{"port": port}).Info("")

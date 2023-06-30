@@ -164,8 +164,9 @@ func main() {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 	log.SetFormatter(&utils.LogFormatter{Module: "SCN"})
-
+	// cvedb的存放路径
 	dbPath := flag.String("d", "./dbgen/", "cve database file directory")
+	// nevector服务的地址
 	join := flag.String("j", "", "Controller join address")
 	joinPort := flag.Uint("join_port", 0, "Controller join port")
 	adv := flag.String("a", "", "Advertise address")
@@ -311,8 +312,8 @@ func main() {
 		// DB read error printed inside dbRead()
 		dbData := dbRead(*dbPath, 3, "")
 		if dbData != nil {
+			// 启动扫描
 			result := scanOnDemand(req, dbData)
-
 			// submit scan result if join address is given
 			if result != nil && result.Error == share.ScanErrorCode_ScanErrNone &&
 				*join != "" && *ctrlUser != "" && *ctrlPass != "" {
@@ -341,14 +342,13 @@ func main() {
 
 		return
 	}
-
 	// Block until server is up.
 	grpcServer := startGRPCServer()
 	defer grpcServer.Stop()
 
 	if !(*noWait) {
 		// Intentionally introduce some delay so scanner IP can be populated to all enforcers
-		log.Info("Wait 15s ...")
+		log.Info("Wait 15s .........................")
 		time.Sleep(time.Second * 15)
 	}
 
