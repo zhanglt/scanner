@@ -85,6 +85,7 @@ func (ts *Tasker) putInputFile(request interface{}) (string, []string, error) {
 		uid = uuid.New().String()
 		input := fmt.Sprintf(reqTemplate, uid)
 		if _, err := os.Stat(input); err != nil { // not existed
+			// 数据写入input文件（扫描目标）
 			if err = ioutil.WriteFile(input, data, 0644); err == nil {
 				args = append(args, "-i", input)
 				args = append(args, "-o", fmt.Sprintf(resTemplate, uid))
@@ -114,13 +115,14 @@ func (ts *Tasker) getResultFile(uid string) (*share.ScanResult, error) {
 	return &res, nil
 }
 
-//////
+// 解析requst生成扫描参数列表，并调用shell命令来启动扫描
 func (ts *Tasker) Run(ctx context.Context, request interface{}) (*share.ScanResult, error) {
 	if !ts.bEnable {
 		return nil, fmt.Errorf("session ended")
 	}
 
 	log.Debug()
+	// 根据扫描请求生成input文件
 	uid, args, err := ts.putInputFile(request)
 	if err != nil {
 		log.WithFields(log.Fields{"err": err}).Error()
@@ -136,7 +138,7 @@ func (ts *Tasker) Run(ctx context.Context, request interface{}) (*share.ScanResu
 	defer os.RemoveAll(workingFolder)
 
 	log.WithFields(log.Fields{"cmd": ts.taskPath, "wpath": workingFolder, "args": args}).Debug()
-	//////
+	// 调用shell命令来启动扫描
 	cmd := exec.Command(ts.taskPath, args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	if ts.bShowDebug {

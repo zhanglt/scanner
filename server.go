@@ -42,7 +42,7 @@ func (rs *rpcService) ScanRunning(ctx context.Context, req *share.ScanRunningReq
 	var result *share.ScanResult
 
 	log.WithFields(log.Fields{"id": req.ID, "type": req.Type, "agent": req.AgentRPCEndPoint}).Debug("")
-
+	// 依据AgentRPCEdingPoint 获取EnforceServiceCleint
 	client, err := findEnforcerServiceClient(req.AgentRPCEndPoint)
 	if err != nil {
 		log.WithFields(log.Fields{"error": err}).Error("Fail to connect to agent")
@@ -50,7 +50,7 @@ func (rs *rpcService) ScanRunning(ctx context.Context, req *share.ScanRunningReq
 		result = &share.ScanResult{Version: cveTools.CveDBVersion, CVEDBCreateTime: cveTools.CveDBCreateTime, Error: share.ScanErrorCode_ScanErrNetwork}
 		return result, nil
 	}
-
+	//获取扫描请求数据
 	data, err := client.ScanGetFiles(ctx, req)
 	if ctx.Err() != nil { // context.Canceled: remote cancelled
 		// no timeout is set for (enforcer <-> scanner)

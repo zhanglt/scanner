@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strings"
@@ -72,6 +73,7 @@ func processRequest(tm *taskMain, scanType, infile, workingPath string) int {
 			return tm.doScanTask(req, workingPath)
 		}
 	case "dat": // img/pkg data scan: it is also a result from scan_running_image
+		log.WithFields(log.Fields{"扫描类型": "dat"}).Info("开始扫描...")
 		var req share.ScanData
 		if err = json.Unmarshal(byteValue, &req); err == nil {
 			return tm.doScanTask(req, workingPath)
@@ -134,7 +136,10 @@ func main() {
 		if checkDbReady() { // check if loaded and unzipped in the target path
 			if tm, ok := InitTaskMain(*outfile); ok {
 				fmt.Println("---------------scanType:", *scanType)
-				fmt.Println("---------------input:", *infile)
+				fmt.Println("----------------input:", *infile)
+				fmt.Println("----------------ouput:", *outfile)
+				exec.Command("cp", *infile, "/root/temp/").Run()
+				exec.Command("cp", *outfile, "/root/temp/").Run()
 				fmt.Println("---------------imageWorkingPath:", imageWorkingPath)
 				nRet = processRequest(tm, *scanType, *infile, imageWorkingPath)
 			}

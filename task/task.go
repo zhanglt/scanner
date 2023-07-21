@@ -27,7 +27,7 @@ func InitTaskMain(filename string) (*taskMain, bool) {
 	return tm, true
 }
 
-/////
+// 扫描镜像库
 func (tm *taskMain) ScanImage(req share.ScanImageRequest, imgPath string) (*share.ScanResult, error) {
 	log.WithFields(log.Fields{
 		"Registry": req.Registry, "image": fmt.Sprintf("%s:%s", req.Repository, req.Tag), "base": req.BaseImage,
@@ -64,15 +64,19 @@ func (tm *taskMain) doScanTask(request interface{}, workingPath string) int {
 
 	switch request.(type) {
 	case share.ScanImageRequest:
+		log.WithFields(log.Fields{"扫描类型": "Registry"}).Info("开始扫描...")
 		req := request.(share.ScanImageRequest)
 		res, err = tm.ScanImage(req, workingPath)
 	case share.ScanAppRequest:
+		log.WithFields(log.Fields{"扫描类型": "APP"}).Info("开始扫描...")
 		req := request.(share.ScanAppRequest)
 		res, err = tm.ScanAppPackage(req)
 	case share.ScanData:
+		log.WithFields(log.Fields{"扫描类型": "Data"}).Info("开始扫描...")
 		req := request.(share.ScanData)
 		res, err = tm.ScanImageData(req)
 	case share.ScanAwsLambdaRequest:
+		log.WithFields(log.Fields{"扫描类型": "AWS"}).Info("开始扫描...")
 		req := request.(share.ScanAwsLambdaRequest)
 		res, err = tm.ScanAwsLambda(req, workingPath)
 	default:
