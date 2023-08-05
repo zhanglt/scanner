@@ -188,6 +188,7 @@ func main() {
 
 	verbose := flag.Bool("x", false, "more debug")
 	output := flag.String("o", "", "Output CVEDB in json format, specify the output file")
+	show := flag.String("show", "", "Standalone Mode: Stdout print options, cmd,module")
 	getVer := flag.Bool("v", false, "show cve database version")
 
 	flag.Usage = usage
@@ -280,6 +281,7 @@ func main() {
 		var req *share.ScanImageRequest
 
 		if *image != "" {
+			// This normally is the case when scanner runs by the command line
 			reg, repo, tag := parseImageValue(*image)
 			if repo == "" || tag == "" {
 				log.Error("Invalid image value.")
@@ -292,8 +294,8 @@ func main() {
 				Tag:         tag,
 				Username:    *regUser,
 				Password:    *regPass,
-				ScanLayers:  *scanLayers,
-				ScanSecrets: true,
+				ScanLayers:  true,
+				ScanSecrets: false,
 				BaseImage:   *baseImage,
 			}
 		} else {
@@ -312,8 +314,8 @@ func main() {
 		// DB read error printed inside dbRead()
 		dbData := dbRead(*dbPath, 3, "")
 		if dbData != nil {
-			// 启动扫描
-			result := scanOnDemand(req, dbData)
+			result := scanOnDemand(req, dbData, *show)
+
 			// submit scan result if join address is given
 			if result != nil && result.Error == share.ScanErrorCode_ScanErrNone &&
 				*join != "" && *ctrlUser != "" && *ctrlPass != "" {
